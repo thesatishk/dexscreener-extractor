@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "DEXScreener Extractor",
+  "version": "1.0",
+  "description": "Extract DEXScreener data and send to webhook",
+  "permissions": ["activeTab", "storage", "alarms"],
+  "host_permissions": ["https://dexscreener.com/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "images/icon16.png",
+      "48": "images/icon16.png",
+      "128": "images/icon16.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://dexscreener.com/*"],
+      "js": ["content.js"]
+    }
+  ]
+}

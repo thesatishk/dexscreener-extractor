@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      width: 350px;
+      padding: 10px;
+      font-family: Arial, sans-serif;
+    }
+    h2 {
+      margin-top: 0;
+      color: #333;
+    }
+    .section {
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      box-sizing: border-box;
+    }
+    .status {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #666;
+    }
+    .info {
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+    }
+    label {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+    }
+    .toggle {
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>DEXScreener Extractor</h2>
+  
+  <div class="section">
+    <div class="info" id="lastExtraction">No extraction history</div>
+    <div class="info" id="nextExtraction">Auto-extract status loading...</div>
+    <div style="display: flex; gap: 10px; margin-top: 10px;">
+      <button id="refreshButton" style="flex: 1; background-color: #2196F3;">Refresh Page</button>
+      <button id="extractButton" style="flex: 2;">Extract Data Now</button>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h3>Settings</h3>
+    
+    <label for="webhookUrl">Webhook URL:</label>
+    <input type="text" id="webhookUrl" placeholder="https://your-webhook-url.com">
+    
+    <label>
+      <input type="checkbox" id="autoExtractToggle" class="toggle" checked>
+      Enable automatic extraction
+    </label>
+    
+    <label for="extractInterval">Extract every:</label>
+    <select id="extractInterval">
+      <option value="5">5 minutes</option>
+      <option value="15">15 minutes</option>
+      <option value="30">30 minutes</option>
+      <option value="60" selected>1 hour</option>
+      <option value="120">2 hours</option>
+      <option value="240">4 hours</option>
+      <option value="360">6 hours</option>
+      <option value="720">12 hours</option>
+      <option value="1440">24 hours</option>
+    </select>
+    
+    <button id="saveSettingsButton">Save Settings</button>
+  </div>
+  
+  <div class="status" id="status">Ready</div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
