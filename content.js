@@ -102,18 +102,13 @@ function extractTableData() {
         // Look for the parent row
         const parentRow = row.closest('.ds-dex-table-row-top');
         
-        // Extract token symbol and name from the token cell
-        let tokenText = row.textContent.trim() || '';
-        let tokenSymbol = '';
-        let tokenName = '';
+        // Extract token symbol (base/quote format)
+        const baseTokenSymbol = row.querySelector('.ds-dex-table-row-base-token-symbol')?.textContent.trim() || '';
+        const quoteTokenSymbol = row.querySelector('.ds-dex-table-row-quote-token-symbol')?.textContent.trim() || '';
+        const tokenSymbol = baseTokenSymbol && quoteTokenSymbol ? `${baseTokenSymbol}/${quoteTokenSymbol}` : 'Unknown';
         
-        if (tokenText) {
-          const match = tokenText.match(/(\S+)\s*(.*)/);
-          if (match) {
-            tokenSymbol = match[1];
-            tokenName = match[2].trim();
-          }
-        }
+        // Extract token name
+        const tokenName = row.querySelector('.ds-dex-table-row-base-token-name-text')?.textContent.trim() || '';
         
         // Find the DEX icon directly in the parent row, not in a specific cell
         let dexName = 'Unknown';
