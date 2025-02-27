@@ -5,11 +5,13 @@ let webhookUrl = "http://localhost:3000/webhook"; // Default webhook URL
 let autoExtractEnabled = true; // Default to enabled
 let extractInterval = 60 * 60 * 1000; // 1 hour in milliseconds
 let extractIntervalId = null;
+let isPanelVisible = true; // New variable to track panel visibility
 
 // Create UI elements
 function createUIElements() {
   // Create container
   const container = document.createElement('div');
+  container.id = 'dexscreener-control-panel'; // Add ID for easy selection
   container.style.position = 'fixed';
   container.style.top = '10px';
   container.style.right = '10px';
@@ -18,7 +20,7 @@ function createUIElements() {
   container.style.padding = '10px';
   container.style.borderRadius = '5px';
   container.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
-  container.style.display = 'flex';
+  container.style.display = isPanelVisible ? 'flex' : 'none'; // Add this line
   container.style.flexDirection = 'column';
   container.style.gap = '10px';
   
@@ -124,23 +126,25 @@ function extractTableData() {
         const dataCells = parentRow ? Array.from(parentRow.querySelectorAll('.ds-table-data-cell')) : [];
         console.log(`Found ${dataCells.length} data cells for ${tokenSymbol}`);
         
+        const pairUrl = parentRow.href
         // Map specific data cells to their values
         // This may need adjustment based on the actual structure
         return {
           tokenSymbol: tokenSymbol || 'Unknown',
           tokenName: tokenName || '',
           dexName: dexName,
-          price: findCellValueByIndex(dataCells, 2) || '',
-          age: findCellValueByIndex(dataCells, 3) || '',
-          txns: findCellValueByIndex(dataCells, 4) || '',
-          volume: findCellValueByIndex(dataCells, 5) || '',
-          makers: findCellValueByIndex(dataCells, 6) || '',
-          change5m: findCellValueByIndex(dataCells, 7) || '',
-          change1h: findCellValueByIndex(dataCells, 8) || '',
-          change6h: findCellValueByIndex(dataCells, 9) || '',
-          change24h: findCellValueByIndex(dataCells, 10) || '',
-          liquidity: findCellValueByIndex(dataCells, 11) || '',
-          mcap: findCellValueByIndex(dataCells, 12) || ''
+          price: findCellValueByIndex(dataCells, 1) || '',
+          age: findCellValueByIndex(dataCells, 2) || '',
+          txns: findCellValueByIndex(dataCells, 3) || '',
+          volume: findCellValueByIndex(dataCells, 4) || '',
+          makers: findCellValueByIndex(dataCells, 5) || '',
+          change5m: findCellValueByIndex(dataCells, 6) || '',
+          change1h: findCellValueByIndex(dataCells, 7) || '',
+          change6h: findCellValueByIndex(dataCells, 8) || '',
+          change24h: findCellValueByIndex(dataCells, 9) || '',
+          liquidity: findCellValueByIndex(dataCells, 10) || '',
+          mcap: findCellValueByIndex(dataCells, 11) || '',
+          pairUrl: pairUrl
         };
       } catch (error) {
         console.error('Error processing row:', error);
@@ -158,7 +162,8 @@ function extractTableData() {
           change6h: '',
           change24h: '',
           liquidity: '',
-          mcap: ''
+          mcap: '',
+          pairUrl: ''
         };
       }
     });
@@ -463,15 +468,50 @@ function updateNextExtractionTime() {
   }
 }
 
+// Add new function to create toggle button
+function createToggleButton() {
+  const toggleButton = document.createElement('button');
+  toggleButton.textContent = '🔽';
+  toggleButton.style.position = 'fixed';
+  toggleButton.style.top = '10px';
+  toggleButton.style.right = '260px';
+  toggleButton.style.zIndex = '9999';
+  toggleButton.style.borderRadius = '50%';
+  toggleButton.style.width = '30px';
+  toggleButton.style.height = '30px';
+  toggleButton.style.backgroundColor = '#f8f9fa';
+  toggleButton.style.border = '1px solid #ddd';
+  toggleButton.style.cursor = 'pointer';
+  
+  toggleButton.addEventListener('click', () => {
+    isPanelVisible = !isPanelVisible;
+    toggleButton.textContent = isPanelVisible ? '🔽' : '🔼';
+    const container = document.querySelector('#dexscreener-control-panel');
+    if (container) {
+      container.style.display = isPanelVisible ? 'flex' : 'none';
+    }
+    // Save preference
+    chrome.storage.local.set({ isPanelVisible });
+  });
+  
+  document.body.appendChild(toggleButton);
+}
+
 // Initialize when page is fully loaded
 window.addEventListener('load', () => {
   // Wait a bit to ensure the page is fully loaded and data is rendered
   setTimeout(() => {
+    createToggleButton(); // Add this line before createUIElements
     createUIElements();
     addSettingsButton();
     
     // Check if settings have been set via storage
-    chrome.storage.local.get(['webhookUrl', 'autoExtractEnabled', 'extractInterval'], function(result) {
+    chrome.storage.local.get([
+      'webhookUrl', 
+      'autoExtractEnabled', 
+      'extractInterval',
+      'isPanelVisible'  // Add this line
+    ], function(result) {
       if (result.webhookUrl) {
         webhookUrl = result.webhookUrl;
       }
@@ -482,6 +522,18 @@ window.addEventListener('load', () => {
       
       if (result.extractInterval) {
         extractInterval = result.extractInterval;
+      }
+      
+      if (result.isPanelVisible !== undefined) {
+        isPanelVisible = result.isPanelVisible;
+        const container = document.querySelector('#dexscreener-control-panel');
+        const toggleButton = document.querySelector('#panel-toggle-button');
+        if (container) {
+          container.style.display = isPanelVisible ? 'flex' : 'none';
+        }
+        if (toggleButton) {
+          toggleButton.textContent = isPanelVisible ? '🔽' : '🔼';
+        }
       }
       
       // Start auto-extract if enabled
